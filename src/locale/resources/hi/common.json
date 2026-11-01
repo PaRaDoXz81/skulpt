@@ -296,6 +296,7 @@
         "dropset": "ड्रॉप सेट",
         "failure": "फेल्यर"
     },
+    "previousSet": "पिछला",
     "setTypeShort": {
         "working": "W",
         "warmup": "WU",

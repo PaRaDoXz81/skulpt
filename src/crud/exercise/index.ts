@@ -1,4 +1,4 @@
-import { eq, and, desc, inArray, or, exists, like, sql, type SQL } from 'drizzle-orm';
+import { eq, ne, and, desc, inArray, or, exists, like, sql, type SQL } from 'drizzle-orm';
 
 import { db } from '@/db';
 import {
@@ -564,6 +564,44 @@ export const getLastExerciseSetsByExerciseId = async (
     if (latestWorkoutExercise.length === 0) return [];
 
     return await getExerciseSets(latestWorkoutExercise[0].id);
+};
+
+/**
+ * Completed sets from the user's most recent finished workout that included this exercise,
+ * excluding the workout currently being logged.
+ */
+export const getPreviousExerciseSets = async (
+    exerciseId: string,
+    userId: string,
+    currentWorkoutId: string,
+): Promise<ExerciseSetSelect[]> => {
+    try {
+        const candidates = await db
+            .select({ id: workoutExercise.id })
+            .from(workoutExercise)
+            .innerJoin(workout, eq(workout.id, workoutExercise.workoutId))
+            .where(
+                and(
+                    eq(workoutExercise.exerciseId, exerciseId),
+                    eq(workout.userId, userId),
+                    eq(workout.status, 'completed'),
+                    ne(workout.id, currentWorkoutId),
+                ),
+            )
+            .orderBy(desc(workout.completedAt), desc(workout.createdAt))
+            .limit(10);
+
+        for (const candidate of candidates) {
+            const sets = await getExerciseSets(candidate.id);
+            const completedSets = sets.filter((set) => set.completedAt != null);
+            if (completedSets.length > 0) return completedSets;
+        }
+
+        return [];
+    } catch (error) {
+        reportError(error, 'Failed to load previous exercise sets:');
+        return [];
+    }
 };
 
 export const getExerciseHistory = async (

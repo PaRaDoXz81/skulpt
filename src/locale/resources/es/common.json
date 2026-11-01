@@ -296,6 +296,7 @@
         "dropset": "Dropset",
         "failure": "Fallo"
     },
+    "previousSet": "Anterior",
     "setTypeShort": {
         "working": "W",
         "warmup": "WU",

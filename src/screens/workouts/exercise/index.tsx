@@ -15,6 +15,8 @@ import Spinner from '@/components/feedback/spinner';
 import { useUpdateExerciseSet, useWorkoutWithDetails } from '@/hooks/use-workouts';
 import { ExerciseSetSelect } from '@/db/schema';
 import { useRunningWorkoutTicker } from '@/hooks/use-running-workout';
+import { usePreviousExerciseSets } from '@/hooks/use-exercises';
+import { getPreviousSetAt } from '@/helpers/previous-set';
 
 import { Header } from './components/header';
 import { Actions } from './components/actions';
@@ -87,6 +89,11 @@ const WorkoutExerciseScreen: FC = () => {
         if (!we) return null;
         return we;
     }, [workoutDetails, workoutExerciseId]);
+
+    const { data: previousSets } = usePreviousExerciseSets(
+        exerciseInfo?.exercise?.id,
+        workoutId || '',
+    );
 
     const sourceItems = useMemo(() => exerciseInfo?.sets || [], [exerciseInfo?.sets]);
     const sourceItemsKey = useMemo(
@@ -175,6 +182,7 @@ const WorkoutExerciseScreen: FC = () => {
                                     exerciseInfo={exerciseInfo}
                                     set={item}
                                     index={index}
+                                    previousSet={getPreviousSetAt(previousSets, index)}
                                     nowMs={nowMs}
                                     activeSetId={runningWorkoutActiveSet?.id ?? null}
                                     restingSetId={runningWorkoutRestingSet?.id ?? null}

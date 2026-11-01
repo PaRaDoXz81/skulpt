@@ -8,6 +8,7 @@ import {
     mergeExercise,
     getExerciseById,
     getExerciseHistory,
+    getPreviousExerciseSets,
     updateExercise,
     type ExerciseHistoryItem,
     type ExerciseFilterParams,
@@ -86,6 +87,16 @@ export const useExerciseHistory = (exerciseId: string) => {
         queryKey: ['exercise-history', exerciseId, user?.id],
         queryFn: () => getExerciseHistory(exerciseId, user!.id),
         enabled: !!user?.id && !!exerciseId,
+    });
+};
+
+export const usePreviousExerciseSets = (exerciseId: string | undefined, workoutId: string) => {
+    const { user } = useUser();
+
+    return useQuery({
+        queryKey: ['exercise-previous-sets', exerciseId, workoutId, user?.id],
+        queryFn: () => getPreviousExerciseSets(exerciseId!, user!.id, workoutId),
+        enabled: !!user?.id && !!exerciseId && !!workoutId,
     });
 };
 

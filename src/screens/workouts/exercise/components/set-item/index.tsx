@@ -21,7 +21,12 @@ import { WeightInput } from '@/components/primitives/weight-input';
 import { RepsInput } from '@/components/primitives/reps-input';
 import { DistanceInput } from '@/components/primitives/distance-input';
 import { normalizeSetType } from '@/helpers/set-type';
+import { getSetTrend, type SetTrend } from '@/helpers/previous-set';
+import { formatSet } from '@/helpers/workouts';
+import { VStack } from '@/components/primitives/vstack';
 import { useTranslation } from 'react-i18next';
+
+const TREND_ARROWS: Record<SetTrend, string> = { up: '▲', down: '▼', same: '=' };
 
 interface SetItemProps {
     set: ExerciseSetSelect;
@@ -30,6 +35,7 @@ interface SetItemProps {
         workoutExercise: WorkoutExerciseSelect;
     } | null;
     index: number;
+    previousSet: ExerciseSetSelect | null;
     nowMs: number;
     activeSetId: string | null;
     restingSetId: string | null;
@@ -84,12 +90,28 @@ const styles = StyleSheet.create((theme, rt) => ({
         fontSize: theme.fontSize.sm.fontSize,
         color: theme.colors.neutral[400],
     },
-    setContainer: {
+    middle: {
         flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: theme.space(1),
+    },
+    setContainer: {
         alignItems: 'center',
         justifyContent: 'center',
         gap: theme.space(2),
     },
+    previous: (trend: SetTrend | null) => ({
+        fontSize: theme.fontSize.sm.fontSize,
+        fontWeight: theme.fontWeight.medium.fontWeight,
+        color:
+            trend === 'up'
+                ? theme.colors.lime[500]
+                : trend === 'down'
+                  ? theme.colors.red[500]
+                  : theme.colors.typography,
+        opacity: trend === 'up' || trend === 'down' ? 1 : 0.5,
+    }),
     separator: {
         marginLeft: theme.space(4),
         marginRight: theme.space(4),
@@ -169,6 +191,7 @@ const SetItemComponent = ({
     set,
     exerciseInfo,
     index,
+    previousSet,
     nowMs,
     activeSetId,
     restingSetId,
@@ -189,6 +212,11 @@ const SetItemComponent = ({
     const initialSeconds = useMemo(() => Math.max(0, set.restTime ?? 0), [set.restTime]);
 
     const isTimerActive = set.id === restingSetId;
+
+    const trend = useMemo(
+        () => getSetTrend(exerciseInfo?.exercise, set, previousSet),
+        [exerciseInfo?.exercise, set, previousSet],
+    );
 
     const handleDelete = useCallback(
         (id: string) => {
@@ -389,7 +417,14 @@ const SetItemComponent = ({
                             </Box>
                         </Pressable>
                     </Box>
-                    <HStack style={styles.setContainer}>{interspersedFields}</HStack>
+                    <VStack style={styles.middle}>
+                        <HStack style={styles.setContainer}>{interspersedFields}</HStack>
+                        {previousSet ? (
+                            <Text style={styles.previous(trend)}>
+                                {`${trend ? TREND_ARROWS[trend] : ''} ${t('previousSet', { ns: 'common' })}: ${formatSet(exerciseInfo?.exercise, previousSet)}`.trim()}
+                            </Text>
+                        ) : null}
+                    </VStack>
                     <Box style={styles.restContainer}>
                         <Rest
                             workoutExerciseId={set.workoutExerciseId}
@@ -407,6 +442,7 @@ export const SetItem = memo(SetItemComponent, (prev, next) => {
     if (prev.set !== next.set) return false;
     if (prev.exerciseInfo !== next.exerciseInfo) return false;
     if (prev.index !== next.index) return false;
+    if (prev.previousSet !== next.previousSet) return false;
     if (prev.activeSetId !== next.activeSetId) return false;
     if (prev.restingSetId !== next.restingSetId) return false;
 

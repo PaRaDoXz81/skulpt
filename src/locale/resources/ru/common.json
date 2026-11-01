@@ -296,6 +296,7 @@
         "dropset": "Дропсет",
         "failure": "Отказ"
     },
+    "previousSet": "Прошлый",
     "setTypeShort": {
         "working": "Р",
         "warmup": "РЗ",

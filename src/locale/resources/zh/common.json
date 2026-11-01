@@ -296,6 +296,7 @@
         "dropset": "递减组",
         "failure": "力竭组"
     },
+    "previousSet": "上次",
     "setTypeShort": {
         "working": "W",
         "warmup": "WU",
