@@ -393,6 +393,26 @@
                     "message": "यह मेरा पसंदीदा वर्कआउट लॉगिंग ऐप है: {{url}}"
                 }
             }
+        },
+        "data": {
+            "title": "डेटा",
+            "export": {
+                "title": "डेटा निर्यात करें",
+                "errorTitle": "निर्यात विफल",
+                "errorDescription": "आपका डेटा निर्यात नहीं किया जा सका।"
+            },
+            "import": {
+                "title": "डेटा आयात करें",
+                "confirmTitle": "बैकअप आयात करें?",
+                "confirmDescription": "फ़ाइल के वर्कआउट, एक्सरसाइज़ और माप इस डिवाइस में जोड़े जाएंगे। आपके मौजूदा आइटम तब तक रखे जाते हैं जब तक फ़ाइल में नया संस्करण न हो।",
+                "confirmAction": "आयात करें",
+                "successTitle": "आयात पूरा हुआ",
+                "successDescription": "{{added}} जोड़े गए, {{updated}} अपडेट हुए, {{skipped}} छोड़े गए।",
+                "errorTitle": "आयात विफल",
+                "invalidFile": "यह Skulpt बैकअप फ़ाइल नहीं है।",
+                "newerVersion": "यह बैकअप ऐप के नए संस्करण से बनाया गया था।",
+                "errorDescription": "फ़ाइल आयात नहीं की जा सकी।"
+            }
         }
     },
     "notifications": {

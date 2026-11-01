@@ -393,6 +393,26 @@
                     "message": "Here's my favorite workout logging app: {{url}}"
                 }
             }
+        },
+        "data": {
+            "title": "Data",
+            "export": {
+                "title": "Export data",
+                "errorTitle": "Export failed",
+                "errorDescription": "Your data could not be exported."
+            },
+            "import": {
+                "title": "Import data",
+                "confirmTitle": "Import backup?",
+                "confirmDescription": "Workouts, exercises and measurements from the file are added to this device. Items you already have are kept unless the file has a newer version.",
+                "confirmAction": "Import",
+                "successTitle": "Import complete",
+                "successDescription": "Added {{added}}, updated {{updated}}, skipped {{skipped}}.",
+                "errorTitle": "Import failed",
+                "invalidFile": "This is not a Skulpt backup file.",
+                "newerVersion": "This backup was made by a newer version of the app.",
+                "errorDescription": "The file could not be imported."
+            }
         }
     },
     "notifications": {

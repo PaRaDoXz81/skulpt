@@ -393,6 +393,26 @@
                     "message": "Esta es mi app favorita para registrar entrenamientos: {{url}}"
                 }
             }
+        },
+        "data": {
+            "title": "Datos",
+            "export": {
+                "title": "Exportar datos",
+                "errorTitle": "Error al exportar",
+                "errorDescription": "No se pudieron exportar tus datos."
+            },
+            "import": {
+                "title": "Importar datos",
+                "confirmTitle": "¿Importar copia de seguridad?",
+                "confirmDescription": "Los entrenamientos, ejercicios y medidas del archivo se añaden a este dispositivo. Se conservan los elementos que ya tienes, salvo que el archivo tenga una versión más reciente.",
+                "confirmAction": "Importar",
+                "successTitle": "Importación completada",
+                "successDescription": "Añadidos {{added}}, actualizados {{updated}}, omitidos {{skipped}}.",
+                "errorTitle": "Error al importar",
+                "invalidFile": "Este no es un archivo de copia de Skulpt.",
+                "newerVersion": "Esta copia fue creada con una versión más reciente de la app.",
+                "errorDescription": "No se pudo importar el archivo."
+            }
         }
     },
     "notifications": {

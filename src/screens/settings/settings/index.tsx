@@ -5,6 +5,7 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useTranslation } from 'react-i18next';
 import Constants from 'expo-constants';
 import * as MailComposer from 'expo-mail-composer';
+import { File } from 'expo-file-system';
 import {
     Globe,
     ChevronRight,
@@ -20,6 +21,8 @@ import {
     MessageCircle,
     Star,
     Undo2,
+    Download,
+    Upload,
 } from 'lucide-react-native';
 
 import { Title } from '@/components/typography/title';
@@ -35,6 +38,8 @@ import { useRunningWorkoutStatic } from '@/hooks/use-running-workout';
 import { reportError } from '@/services/error-reporting';
 import { requestStoreReviewIfAvailable } from '@/services/store-review';
 import { useAnalytics } from '@/hooks/use-analytics';
+import { queryClient } from '@/queries';
+import { BackupFormatError, exportBackup, importBackup } from '@/services/data-backup';
 
 const styles = StyleSheet.create((theme, rt) => ({
     container: {
@@ -184,6 +189,91 @@ const SettingsScreen = () => {
             },
         );
     };
+
+    const [isTransferring, setIsTransferring] = useState(false);
+
+    const handleExportData = async () => {
+        if (!user || isTransferring) return;
+
+        setIsTransferring(true);
+        try {
+            await exportBackup(user.id);
+        } catch (error) {
+            reportError(error, 'Failed to export data:');
+            Alert.alert(
+                t('settings.data.export.errorTitle', { ns: 'screens' }),
+                t('settings.data.export.errorDescription', { ns: 'screens' }),
+            );
+        } finally {
+            setIsTransferring(false);
+        }
+    };
+
+    const pickAndImportData = async () => {
+        if (!user || isTransferring) return;
+
+        setIsTransferring(true);
+        try {
+            const picked = await File.pickFileAsync({ mimeTypes: '*/*' });
+            if (picked.canceled) return;
+
+            const summary = await importBackup(await picked.result.text(), user.id);
+            await queryClient.invalidateQueries();
+
+            Alert.alert(
+                t('settings.data.import.successTitle', { ns: 'screens' }),
+                t('settings.data.import.successDescription', { ns: 'screens', ...summary }),
+            );
+        } catch (error) {
+            const description =
+                error instanceof BackupFormatError
+                    ? t(
+                          error.code === 'newer_version'
+                              ? 'settings.data.import.newerVersion'
+                              : 'settings.data.import.invalidFile',
+                          { ns: 'screens' },
+                      )
+                    : t('settings.data.import.errorDescription', { ns: 'screens' });
+
+            if (!(error instanceof BackupFormatError)) {
+                reportError(error, 'Failed to import data:');
+            }
+
+            Alert.alert(t('settings.data.import.errorTitle', { ns: 'screens' }), description);
+        } finally {
+            setIsTransferring(false);
+        }
+    };
+
+    const handleImportData = () => {
+        Alert.alert(
+            t('settings.data.import.confirmTitle', { ns: 'screens' }),
+            t('settings.data.import.confirmDescription', { ns: 'screens' }),
+            [
+                { text: t('cancel', { ns: 'common' }), style: 'cancel' },
+                {
+                    text: t('settings.data.import.confirmAction', { ns: 'screens' }),
+                    onPress: () => {
+                        pickAndImportData();
+                    },
+                },
+            ],
+            { cancelable: true },
+        );
+    };
+
+    const data = [
+        {
+            icon: Download,
+            title: t('settings.data.export.title', { ns: 'screens' }),
+            onPress: handleExportData,
+        },
+        {
+            icon: Upload,
+            title: t('settings.data.import.title', { ns: 'screens' }),
+            onPress: handleImportData,
+        },
+    ];
 
     const settings = [
         {
@@ -390,6 +480,42 @@ const SettingsScreen = () => {
                     </VStack>
                 </VStack>
             )}
+            <VStack style={styles.fieldContainer}>
+                <Label>{t('settings.data.title', { ns: 'screens' })}</Label>
+                <VStack style={styles.settingsContainer}>
+                    <VStack style={styles.settingsWrapper}>
+                        {data.map((setting, index) => (
+                            <VStack key={index}>
+                                <Pressable disabled={isTransferring} onPress={setting.onPress}>
+                                    <HStack style={styles.settingContainer}>
+                                        <Box style={styles.iconContainer}>
+                                            <setting.icon
+                                                size={theme.space(5)}
+                                                strokeWidth={theme.space(0.375)}
+                                                opacity={0.8}
+                                                color={theme.colors.typography}
+                                            />
+                                        </Box>
+                                        <HStack style={styles.settingContentContainer}>
+                                            <VStack style={styles.settingTitleContainer}>
+                                                <Box>
+                                                    <Text
+                                                        fontWeight="medium"
+                                                        style={styles.settingTitle}
+                                                    >
+                                                        {setting.title}
+                                                    </Text>
+                                                </Box>
+                                            </VStack>
+                                        </HStack>
+                                    </HStack>
+                                </Pressable>
+                                {index < data.length - 1 && <Box style={styles.divider} />}
+                            </VStack>
+                        ))}
+                    </VStack>
+                </VStack>
+            </VStack>
             <VStack style={styles.fieldContainer}>
                 <Label>{t('settings.supportSkulpt.title', { ns: 'screens' })}</Label>
                 <VStack style={styles.settingsContainer}>
