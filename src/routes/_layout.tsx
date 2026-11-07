@@ -18,6 +18,7 @@ import { db, dbConnection } from '@/db';
 import i18n from '@/locale/i18n';
 import { useUser, UserProvider } from '@/hooks/use-user';
 import { queryClient } from '@/queries';
+import { seedStarterCatalogue } from '@/services/starter-catalogue';
 import { SyncProvider } from '@/hooks/use-sync';
 import { Stack } from '@/navigators/stack';
 import { useScreen } from '@/hooks/use-screen';
@@ -186,6 +187,16 @@ const RootLayout: FC = () => {
         if (fontsError) throw fontsError;
         if (dbError) throw dbError;
     }, [dbError, fontsError]);
+
+    useEffect(() => {
+        if (!dbSuccess) return;
+
+        seedStarterCatalogue()
+            .then((seeded) => {
+                if (seeded > 0) queryClient.invalidateQueries();
+            })
+            .catch((error) => Sentry.captureException(error));
+    }, [dbSuccess]);
 
     if (!dbSuccess || !fontsLoaded) {
         return null;
